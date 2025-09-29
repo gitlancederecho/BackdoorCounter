@@ -17,6 +17,24 @@
     .foot{position:fixed;bottom:1.2vh;left:0;right:0;text-align:center;font-size:1.3vw;opacity:.55}
   </style>
 </head>
+<script>
+const API = "http://127.0.0.1:5050/count";
+const el = document.getElementById("count") || document.body;
+
+async function refresh(){
+  try {
+    const r = await fetch(API, {cache: "no-store"});
+    const j = await r.json();
+    el.textContent = (j.count ?? 0).toLocaleString();
+  } catch (e) {
+    el.textContent = "0";  // fallback if API fails
+  }
+}
+
+refresh();              // run once at load
+setInterval(refresh, 30000);  // run every 30s
+</script>
+
 <body>
   <div class="wrap">
     <div class="title">Follow us on Instagram<br>インスタでフォローしてね</div>
