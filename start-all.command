@@ -1,14 +1,18 @@
 #!/bin/zsh
 cd "$(dirname "$0")"
-
-# 1) Use your venv so Flask + CORS + dotenv are available
 source .venv/bin/activate
-
-# 2) Start Flask backend in the background (it will read .env automatically)
 python3 server.py &
+PID=$!
 
-# 3) Give the server a moment to bind to 5050
-sleep 1.5
+# Wait for healthz up to 10 seconds
+for i in {1..20}; do
+  if curl -s http://127.0.0.1:5050/healthz | grep -q ok; then
+    break
+  fi
+  sleep 0.5
+done
 
-# 4) Launch Electron
 npm start
+
+# Optional: keep backend alive until electron quits
+wait $PID

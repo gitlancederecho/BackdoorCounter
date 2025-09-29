@@ -45,3 +45,18 @@ app.whenReady().then(() => {
 });
 
 app.on("window-all-closed", () => app.quit());
+
+async function refresh() {
+  const res = await fetch('/count');
+  const data = await res.json();
+  document.getElementById('count').textContent = data.count;
+
+  const now = new Date();
+  const up = document.getElementById('updated');
+  up.textContent = `Last updated ${now.toLocaleTimeString()}`;
+
+  const stale = data.cached_seconds != null && data.cached_seconds > 120; // 2x TTL
+  document.body.style.opacity = stale ? 0.6 : 1;
+}
+setInterval(refresh, 15000);
+refresh();
