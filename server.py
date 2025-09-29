@@ -1,22 +1,36 @@
 # server.py
 import os, time, logging, requests
-from dotenv import load_dotenv
-from flask import Flask, jsonify
+from dotenv import load_dotenv, find_dotenv
+from flask import Flask, jsonify, send_from_directory
 import time
 _last_fetch_error = None
 _last_success_ts = None
 
-# Why: loads IG_USER_ID and IG_ACCESS_TOKEN from your .env file
-load_dotenv()
+# Load the exact .env file even if CWD is weird
+DOTENV_PATH = find_dotenv(usecwd=True)
+load_dotenv(DOTENV_PATH, override=True)
 
-app = Flask(__name__)
+def _clean(s: str | None) -> str | None:
+    if s is None:
+        return None
+    # remove surrounding quotes and whitespace/newlines
+    s = s.strip().strip('"').strip("'")
+    return s
+
+app = Flask(__name__, static_folder='.', static_url_path='')
 
 IG_USER_ID = os.getenv("IG_USER_ID")
 IG_ACCESS_TOKEN = os.getenv("IG_ACCESS_TOKEN")
 
 # optional: sanity log once on startup
 logging.basicConfig(level=logging.INFO)
-logging.info(f"IG_USER_ID={IG_USER_ID} token_len={len(IG_ACCESS_TOKEN) if IG_ACCESS_TOKEN else 0}")
+logging.info(f".env path: {DOTENV_PATH or 'NOT FOUND'}")
+logging.info(
+    "IG_USER_ID=%s token_len=%s token_tail=%s",
+    IG_USER_ID,
+    len(IG_ACCESS_TOKEN) if IG_ACCESS_TOKEN else 0,
+    (IG_ACCESS_TOKEN[-6:] if IG_ACCESS_TOKEN else None),
+)
 
 # Why: tiny in-memory cache so we call Instagram at most once per minute
 _cache = {"ts": 0, "count": None}
@@ -25,9 +39,15 @@ TTL = 60  # seconds
 def fetch_followers():
     global _last_fetch_error, _last_success_ts
     url = f"https://graph.facebook.com/v23.0/{IG_USER_ID}"
-    params = {"fields": "followers_count", "access_token": IG_ACCESS_TOKEN}
+    params = {
+        "fields": "followers_count",
+        "access_token": IG_ACCESS_TOKEN,  # already cleaned
+    }
+
     try:
-        r = requests.get(url, timeout=10)
+        r = requests.get(url, timeout=10, params=params)
+        if r.status_code != 200:
+            logging.error("Graph non-200: %s %s", r.status_code, r.text)
         r.raise_for_status()
         data = r.json()
         count = int(data.get("followers_count", 0))
@@ -38,8 +58,6 @@ def fetch_followers():
         _last_fetch_error = str(e)
         raise
 
-from flask import jsonify
-
 @app.route("/debug")
 def debug():
     age = int(time.time() - (_cache.get("ts") or 0)) if _cache.get("ts") else None
@@ -48,7 +66,14 @@ def debug():
         "cached_seconds": age,
         "ttl": TTL,
         "last_success_ts": _last_success_ts,
-        "last_fetch_error": _last_fetch_error
+        "last_fetch_error": _last_fetch_error,
+        "env": {
+            "ig_user_id": IG_USER_ID,
+            "token_len": len(IG_ACCESS_TOKEN) if IG_ACCESS_TOKEN else 0,
+            "token_head": (IG_ACCESS_TOKEN[:8] + "...") if IG_ACCESS_TOKEN else None,
+            "dotenv_path": DOTENV_PATH,
+            "cwd": os.getcwd()
+        }
     })
 
 @app.get("/count")
@@ -74,3 +99,7 @@ def healthz():
 if __name__ == "__main__":
     # Why: binds to localhost on port 5050 like you already use
     app.run(host="127.0.0.1", port=5050)
+
+@app.route('/display')
+def display():
+    return send_from_directory('.', 'display.html')
