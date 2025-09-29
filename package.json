@@ -1,0 +1,22 @@
+{
+  "name": "backdoor-counter",
+  "version": "1.0.0",
+  "description": "The Backdoor Instagram follower counter",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --mac"
+  },
+  "build": {
+    "appId": "com.backdoor.counter",
+    "productName": "Backdoor Counter",
+    "mac": {
+      "category": "public.app-category.entertainment",
+      "target": ["dmg","zip"]
+    }
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.6.0"
+  }
+}

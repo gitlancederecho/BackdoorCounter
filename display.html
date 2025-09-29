@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Backdoor – Instagram Counter</title>
+  <style>
+    :root{--gold:#d4af37;--bg:#000;--panel:#0b0b0b;}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--gold);font-family:"Times New Roman", Georgia, serif;}
+    .wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:2.5vh;text-align:center;padding:2vh 2vw}
+    .title{font-size:4.8vw;letter-spacing:.06em;text-shadow:0 0 18px rgba(212,175,55,.25)}
+    .count{font-size:20vw;line-height:1;font-weight:800;text-shadow:0 0 30px rgba(212,175,55,.3)}
+    .sub{font-size:2.1vw;opacity:.85}
+    .row{display:flex;gap:5vw;align-items:center;justify-content:center;flex-wrap:wrap}
+    .qrbox{background:var(--panel);padding:1.2vw;border-radius:1.2vw;box-shadow:0 0 40px rgba(212,175,55,.12) inset}
+    .badge{font-size:1.5vw;opacity:.65;margin-top:1.2vh}
+    .foot{position:fixed;bottom:1.2vh;left:0;right:0;text-align:center;font-size:1.3vw;opacity:.55}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="title">Follow us on Instagram<br>インスタでフォローしてね</div>
+    <div id="count" class="count">–</div>
+    <div class="row">
+      <div>
+        <div class="sub">Updates about every 15 sec / 約15秒ごとに更新</div>
+        <div class="badge" id="ts">–</div>
+      </div>
+      <div class="qrbox">
+        <div id="qrcode"></div>
+        <div class="sub">ここから</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">THE BACKDOOR MUSIC BAR | 足利 | Open 19:00–24:00 | 水曜定休</div>
+
+  <script>
+    const IG_PROFILE_URL = "https://instagram.com/thebackdoorjp";
+    const API_ENDPOINT   = "http://127.0.0.1:5050/count"; // ← matches Flask port
+
+    // QR
+    const qr = new Image();
+    qr.alt = "QR";
+    qr.style.width = "20vw";
+    qr.style.height = "20vw";
+    qr.style.objectFit = "contain";
+    qr.src = "https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=" + encodeURIComponent(IG_PROFILE_URL);
+    document.getElementById("qrcode").appendChild(qr);
+
+    // UI refs
+    const elCount = document.getElementById("count");
+    const elTs = document.getElementById("ts");
+    let last = null;
+
+    async function fetchCount(){
+      try{
+        const r = await fetch(API_ENDPOINT, { cache: "no-store" });
+        const j = await r.json();
+        console.log("API says:", j);
+        const n = Number(j.count);
+        if (Number.isFinite(n)){
+          animateTo(n);
+          elTs.textContent = new Date().toLocaleTimeString();
+        } else {
+          elCount.textContent = "–";
+        }
+      } catch (err){
+        console.error(err);
+        elCount.textContent = "–";
+      }
+    }
+
+    function animateTo(n){
+      const start = last ?? n;
+      const dur = 600;
+      const t0 = performance.now();
+      function step(t){
+        const k = Math.min(1, (t - t0) / dur);
+        const v = Math.round(start + (n - start) * k);
+        elCount.textContent = v.toLocaleString();
+        if (k < 1) requestAnimationFrame(step); else last = n;
+      }
+      requestAnimationFrame(step);
+    }
+
+    fetchCount();
+    setInterval(fetchCount, 15000);
+  </script>
+</body>
+</html>
