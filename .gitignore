@@ -9,6 +9,11 @@ is/
 it/
 exists,/
 if/
+a/
+already/
+*/lib/python*/
+*/bin/python*
+*/pyvenv.cfg
 bin/
 include/
 lib/
