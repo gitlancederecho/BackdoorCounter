@@ -3,10 +3,14 @@
 venv/
 env/
 ENV/
+no-op/
+this/
 bin/
 include/
 lib/
 pyenv.cfg
+*.pid
+.flask.pid
 
 # Python cache
 __pycache__/
