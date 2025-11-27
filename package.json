@@ -5,11 +5,33 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder --mac"
+    "build": "electron-builder --mac",
+    "postinstall": "electron-builder install-app-deps"
   },
   "build": {
     "appId": "com.backdoor.counter",
-    "productName": "Backdoor Counter",
+    "productName": "BackdoorCounter",
+    "files": [
+      "**/*",
+      "!node_modules",
+      "server.py",
+      "requirements.txt",
+      ".venv/**/*",
+      "assets/**/*",
+      "display.html",
+      "main.js",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": ".venv",
+        "to": ".venv"
+      },
+      {
+        "from": "server.py",
+        "to": "server.py"
+      }
+    ],
     "mac": {
       "category": "public.app-category.entertainment",
       "target": ["dmg","zip"]

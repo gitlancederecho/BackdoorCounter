@@ -1,19 +1,43 @@
-# Python
+# Python virtual environments
 .venv/
+venv/
+env/
+ENV/
+no-op/
+this/
+is/
+it/
+exists,/
+if/
+a/
+already/
+*/lib/python*/
+*/bin/python*
+*/pyvenv.cfg
+bin/
+include/
+lib/
+pyenv.cfg
+*.pid
+.flask.pid
+
+# Python cache
 __pycache__/
 *.pyc
 
-# Node/Electron
+# Node / Electron
 node_modules/
 frontend/node_modules/
 backend/node_modules/
 dist/
 out/
 
-# OS/Editor
+# OS / Editor junk
 .DS_Store
 .vscode/
+*.log
 
-# Env
+# Env files (secrets)
 .env
 .env.local
+.env.*
