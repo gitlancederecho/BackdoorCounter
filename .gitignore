@@ -5,6 +5,10 @@ env/
 ENV/
 no-op/
 this/
+is/
+it/
+exists,/
+if/
 bin/
 include/
 lib/
