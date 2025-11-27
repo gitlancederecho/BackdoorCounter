@@ -32,9 +32,9 @@ logging.info(
     (IG_ACCESS_TOKEN[-6:] if IG_ACCESS_TOKEN else None),
 )
 
-# Why: tiny in-memory cache so we call Instagram at most once per minute
+# Why: tiny in-memory cache so we call Instagram at most once per 40 seconds
 _cache = {"ts": 0, "count": None}
-TTL = 60  # seconds
+TTL = 40  # seconds
 
 def fetch_followers():
     global _last_fetch_error, _last_success_ts
@@ -96,10 +96,10 @@ def healthz():
     """Quick check that the Flask app is running."""
     return "ok", 200
 
-if __name__ == "__main__":
-    # Why: binds to localhost on port 5050 like you already use
-    app.run(host="127.0.0.1", port=5050)
-
 @app.route('/display')
 def display():
     return send_from_directory('.', 'display.html')
+
+if __name__ == "__main__":
+    # Why: binds to localhost on port 5050 like you already use
+    app.run(host="127.0.0.1", port=5050)

@@ -1,110 +1,421 @@
 <!doctype html>
 <html lang="ja">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The Backdoor – Instagram Counter</title>
-  <style>
-    :root{--gold:#d4af37;--bg:#000;--panel:#0b0b0b;}
-    html,body{height:100%;margin:0;background:var(--bg);color:var(--gold);font-family:"Times New Roman", Georgia, serif;}
-    .wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:2.5vh;text-align:center;padding:2vh 2vw}
-    .title{font-size:4.8vw;letter-spacing:.06em;text-shadow:0 0 18px rgba(212,175,55,.25)}
-    .count{font-size:20vw;line-height:1;font-weight:800;text-shadow:0 0 30px rgba(212,175,55,.3)}
-    .sub{font-size:2.1vw;opacity:.85}
-    .row{display:flex;gap:5vw;align-items:center;justify-content:center;flex-wrap:wrap}
-    .qrbox{background:var(--panel);padding:1.2vw;border-radius:1.2vw;box-shadow:0 0 40px rgba(212,175,55,.12) inset}
-    .badge{font-size:1.5vw;opacity:.65;margin-top:1.2vh}
-    .foot{position:fixed;bottom:1.2vh;left:0;right:0;text-align:center;font-size:1.3vw;opacity:.55}
-  </style>
-</head>
-<script>
-const API = "http://127.0.0.1:5050/count";
-const el = document.getElementById("count") || document.body;
-
-async function refresh(){
-  try {
-    const r = await fetch(API, {cache: "no-store"});
-    const j = await r.json();
-    el.textContent = (j.count ?? 0).toLocaleString();
-  } catch (e) {
-    el.textContent = "0";  // fallback if API fails
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Backdoor – Instagram Counter</title>
+    <style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap');
+      *{margin:0;padding:0;box-sizing:border-box}
+      html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
+  /* Animated elegant gold background */
+  /* Static matte dark gradient background */
+  body{background:linear-gradient(160deg,#282828 0%,#282828 22%,#282828 50%,#282828 68%,#282828 85%,#282828 100%);color:#fff;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+  
+  /* Pulsing Instagram-themed light effect */
+  .ig-pulse-light{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0;
+    background:radial-gradient(ellipse at 50% 50%,rgba(254,218,117,.3) 0%,rgba(250,126,30,.25) 20%,rgba(214,41,118,.2) 40%,rgba(150,47,191,.15) 60%,rgba(79,91,213,.1) 80%,transparent 100%);
+    animation:musicPulse 2.4s ease-in-out infinite,colorShift 8s linear infinite;mix-blend-mode:screen}
+  .ig-pulse-light:nth-child(2){animation-delay:0.4s;animation-duration:3.2s,10s;transform:rotate(45deg)}
+  .ig-pulse-light:nth-child(3){animation-delay:0.8s;animation-duration:2.8s,12s;transform:rotate(-45deg)}
+  
+  @keyframes musicPulse{
+    0%,100%{opacity:.15;transform:scale(0.85)}
+    25%{opacity:.35;transform:scale(1.05)}
+    50%{opacity:.25;transform:scale(0.95)}
+    75%{opacity:.4;transform:scale(1.1)}
   }
-}
-
-refresh();              // run once at load
-setInterval(refresh, 30000);  // run every 30s
-</script>
-
-<body>
-  <div class="wrap">
-    <div class="title">Follow us on Instagram<br>インスタでフォローしてね</div>
-    <div id="count" class="count">–</div>
-    <div id="count" class="big"></div>
-    <div id="updated" class="subtle"></div>
-    <div class="row">
-      <div>
-        <div class="sub">Updates about every 15 sec / 約15秒ごとに更新</div>
-        <div class="badge" id="ts">–</div>
+  @keyframes colorShift{
+    0%{filter:hue-rotate(0deg) brightness(1)}
+    33%{filter:hue-rotate(15deg) brightness(1.1)}
+    66%{filter:hue-rotate(-10deg) brightness(0.95)}
+    100%{filter:hue-rotate(0deg) brightness(1)}
+  }
+  
+  /* Subtle matte texture (static noise + gentle center softness) */
+  body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.20;
+    background:
+      radial-gradient(circle at 50% 50%,rgba(255,255,255,.05) 0%,rgba(255,255,255,0) 55%),
+      url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAIUlEQVQoU2NkYGD4z0AEYBxVSFcwCkY0gJEBE0GYgWgSDAwAAGHxA/2KJHywAAAABJRU5ErkJggg==);
+    background-size:100% 100%,8px 8px;mix-blend-mode:overlay;filter:contrast(105%) brightness(92%)}
+  body:after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(circle at 50% 55%,rgba(0,0,0,0) 50%,rgba(0,0,0,.5) 95%)}
+  
+  /* True responsive layout - everything scales together */
+  .wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;min-height:100vh;padding:2vh 2vw;box-sizing:border-box;}
+  
+  .title{
+    font-size:clamp(2rem,7vw,10.4rem);
+    font-family:'Playfair Display',serif;
+    font-weight:800;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    text-align:center;
+    line-height:1.04;
+    margin-bottom:2vh;
+    -webkit-font-smoothing:antialiased;
+    color:#d4ae5f;
+    text-shadow:0 0 6px rgba(212,174,95,.7),0 0 14px rgba(212,174,95,.6),0 0 24px rgba(201,150,63,.45),0 0 40px rgba(201,150,63,.3);
+  }
+  
+  /* Container scales proportionally with balanced spacing */
+  .counter-box{
+    border:none;
+    border-radius:1.8vw;
+    padding:2.8vh 3.2vw;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:3.5vw;
+    width:auto;
+    max-width:1200px;
+    margin:0 auto 4vh auto;
+    position:relative;
+    overflow:visible;
+    background:linear-gradient(135deg,#feda75 0%,#fa7e1e 22%,#d62976 50%,#962fbf 75%,#4f5bd5 100%);
+    box-shadow:0 28px 70px -14px rgba(0,0,0,.6),0 12px 28px -8px rgba(0,0,0,.55),0 0 28px rgba(214,41,118,.45),0 0 18px rgba(79,91,213,.35) inset,0 2px 6px rgba(255,255,255,.35) inset}
+  
+  /* Glowing effect behind counter box */
+  .counter-box:before{
+    content:"";
+    position:absolute;
+    inset:-20%;
+    z-index:-1;
+    pointer-events:none;
+    background:radial-gradient(circle at 50% 50%,rgba(254,218,117,.5) 0%,rgba(250,126,30,.4) 25%,rgba(214,41,118,.35) 45%,rgba(150,47,191,.3) 65%,rgba(79,91,213,.25) 85%,transparent 100%);
+    background-size:200% 200%;
+    filter:blur(50px) saturate(80%);
+    opacity:1;
+    animation:counterGlowFlow 8s ease-in-out infinite, counterGlowPulse 3s ease-in-out infinite;
+  }
+  @keyframes counterGlowFlow{
+    0%,100%{background-position:50% 50%;filter:hue-rotate(0deg)}
+    25%{background-position:60% 40%;filter:hue-rotate(10deg)}
+    50%{background-position:40% 60%;filter:hue-rotate(-10deg)}
+    75%{background-position:60% 60%;filter:hue-rotate(5deg)}
+  }
+  @keyframes counterGlowPulse{
+    0%,100%{opacity:1;filter:blur(50px) saturate(80%) hue-rotate(0deg)}
+    50%{opacity:.7;filter:blur(65px) saturate(100%) hue-rotate(0deg)}
+  }
+  .counter-box > *{position:relative;z-index:1}
+  
+  /* QR box on left - scales with viewport */
+  .qrbox-left{
+    background:#fff;
+    padding:2vh 2vw;
+    border-radius:1.5vw;
+    box-shadow:0 6px 20px rgba(0,0,0,.3);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:1.2vh;
+    flex-shrink:0;
+    height:100%;
+  }
+  .qrbox-left img{width:13vw;min-width:90px;max-width:180px;height:auto;display:block}
+  .qrbox-left .subtitle{color:#282828;font-size:clamp(0.8rem,1.5vw,1.6rem);text-shadow:none}
+  
+  /* Counter content - scales proportionally */
+  .counter-content{display:flex;flex-direction:column;align-items:center;gap:0.8vh;flex:1;justify-content:center;height:100%;}
+  .followers-text{
+    font-size:clamp(1rem,2.5vw,3rem);
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.12em;
+    color:#282828;
+    text-align:center;
+    margin:0;
+  }
+  
+  /* Digits scale with viewport width */
+  .digits{display:flex;gap:1.8vw;justify-content:center;}
+  .digit{
+    background:#282828;
+    border-radius:1.2vw;
+    width:8.5vw;
+    min-width:55px;
+    max-width:170px;
+    height:calc(8.5vw * 1.33);
+    min-height:calc(55px * 1.33);
+    max-height:calc(170px * 1.33);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 6px 18px rgba(0,0,0,.45);
+  }
+      .digit:before{content:'';position:absolute;top:50%;left:0;right:0;height:2px;background:rgba(0,0,0,.3);z-index:10}
+      .digit-inner{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+      .digit-strip{position:absolute;display:flex;flex-direction:column;transition:transform .6s cubic-bezier(.4,0,.2,1);transform:translateY(0);top:0;left:0;right:0;will-change:transform}
+  .digit-number{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    height:calc(8.5vw * 1.33);
+    min-height:calc(55px * 1.33);
+    max-height:calc(170px * 1.33);
+    font-size:clamp(calc(55px * 0.9), calc(8.5vw * 0.9), calc(170px * 0.9));
+    font-weight:700;
+    color:#fff;
+    line-height:1;
+  }
+  /* Pulse animation for real digit changes */
+  @keyframes digitPulse {0%{box-shadow:0 0 0 rgba(255,180,60,0)}50%{box-shadow:0 0 22px rgba(255,180,60,.85)}100%{box-shadow:0 0 0 rgba(255,180,60,0)}}
+  .digit.flash{animation:digitPulse .9s ease}
+      .subtitle{font-size:clamp(1rem,2.2vw,2rem);font-weight:400;text-align:center;text-shadow:0 2px 10px rgba(0,0,0,.2)}
+  /* Removed LIVE indicator for 5s polling mode */
+  .refresh-pill{display:flex;align-items:center;gap:.5em;font-size:clamp(0.85rem,1.8vw,2rem);font-weight:600;letter-spacing:.07em;padding:.45em 1.2em;background:rgba(0,0,0,.35);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:2px solid rgba(255,255,255,.4);border-radius:999px;color:#fff;text-shadow:0 3px 12px rgba(0,0,0,.45);box-shadow:0 10px 28px rgba(0,0,0,.3);margin:1vh auto 0;pointer-events:none;}
+  .refresh-pill .countdown-num{font-variant-numeric:tabular-nums;min-width:1.6ch;text-align:right;display:inline-block}
+  .debug-overlay{position:fixed;top:1rem;right:1rem;background:rgba(0,0,0,.55);color:#fff;padding:.75rem 1rem;border-radius:12px;font-size:.8rem;font-family:monospace;line-height:1.3;max-width:260px;box-shadow:0 6px 18px rgba(0,0,0,.4);display:none}
+  .debug-overlay.active{display:block}
+  
+  /* Bottom bar - fully responsive */
+  .bottom-bar{
+    position:fixed;
+    bottom:3vh;
+    left:0;
+    right:0;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    padding:0 2.5vw;
+    pointer-events:none;
+  }
+  .instagram-logo{
+    font-size:clamp(1rem,2.8vw,3.2rem);
+    font-family:'Brush Script MT',cursive;
+    font-style:italic;
+    text-shadow:0 2px 10px rgba(0,0,0,.2);
+    pointer-events:none;
+  }
+  @keyframes recordSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+  .backdoor-logo{
+    width:clamp(48px,8.5vw,140px);
+    height:auto;
+    pointer-events:none;
+    filter:drop-shadow(0 4px 12px rgba(0,0,0,.4));
+    animation:recordSpin 8s linear infinite;
+  }
+  .follow-block{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:0.8vh;
+    pointer-events:none;
+  }
+  .follow-block .subtitle{margin:0}
+  .qrbox{
+    background:#fff;
+    padding:1.3vw 1.5vw;
+    border-radius:1.2vw;
+    box-shadow:0 12px 34px rgba(0,0,0,.3);
+    pointer-events:none;
+  }
+  .qrbox img{width:clamp(55px,8.5vw,140px);height:auto;display:block}
+  
+  /* Stack vertically on narrow windows */
+  @media (max-width:900px){
+    .counter-box{flex-direction:column;gap:3vh}
+    .instagram-logo{font-size:clamp(1rem,4vw,2rem);}
+    .backdoor-logo{width:clamp(50px,12vw,100px);}
+  }
+    </style>
+  </head>
+  <body>
+    <!-- Pulsing Instagram lights -->
+    <div class="ig-pulse-light"></div>
+    <div class="ig-pulse-light"></div>
+    <div class="ig-pulse-light"></div>
+    
+    <div class="wrap">
+  <div class="title">THE BACKDOOR INSTAGRAM</div>
+      <div class="counter-box">
+        <div class="qrbox-left">
+          <div id="qrcode"></div>
+          <div class="subtitle">フォローしてね</div>
+        </div>
+        <div class="counter-content">
+          <div id="digits" class="digits"></div>
+          <div class="followers-text">フォロワー数</div>
+        </div>
       </div>
-      <div class="qrbox">
-        <div id="qrcode"></div>
-        <div class="sub">ここから</div>
+  <div id="refreshPill" class="refresh-pill" aria-live="polite">更新まで <span class="countdown-num" id="countdownNum">10</span>秒</div>
+  <div id="debugOverlay" class="debug-overlay"></div>
+      <div class="bottom-bar">
+        <div class="instagram-logo">Instagram</div>
+        <img src="assets/backdoor-logo.png" alt="The Backdoor" class="backdoor-logo">
       </div>
     </div>
-  </div>
-  <div class="foot">THE BACKDOOR MUSIC BAR | 足利 | Open 19:00–24:00 | 水曜定休</div>
-
-  <script>
-    const IG_PROFILE_URL = "https://instagram.com/thebackdoorjp";
-    const API_ENDPOINT   = "http://127.0.0.1:5050/count"; // ← matches Flask port
-
-    // QR
-    const qr = new Image();
-    qr.alt = "QR";
-    qr.style.width = "20vw";
-    qr.style.height = "20vw";
-    qr.style.objectFit = "contain";
-    qr.src = "https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=" + encodeURIComponent(IG_PROFILE_URL);
-    document.getElementById("qrcode").appendChild(qr);
-
-    // UI refs
-    const elCount = document.getElementById("count");
-    const elTs = document.getElementById("ts");
-    let last = null;
-
-    async function fetchCount(){
-      try{
-        const r = await fetch(API_ENDPOINT, { cache: "no-store" });
-        const j = await r.json();
-        console.log("API says:", j);
-        const n = Number(j.count);
-        if (Number.isFinite(n)){
-          animateTo(n);
-          elTs.textContent = new Date().toLocaleTimeString();
-        } else {
-          elCount.textContent = "–";
+    <script>
+      const IG_PROFILE_URL = 'https://instagram.com/thebackdoorjp';
+      const API_ENDPOINT = 'http://127.0.0.1:5050/count';
+      const qr = new Image();
+      qr.alt = 'QR Code';
+      qr.src = 'https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=' + encodeURIComponent(IG_PROFILE_URL);
+      document.getElementById('qrcode').appendChild(qr);
+      const digitsContainer = document.getElementById('digits');
+      let currentCount = null;
+      let digitElements = [];
+      function createDigitElement(){
+        const digit = document.createElement('div');
+        digit.className='digit';
+        const inner=document.createElement('div');inner.className='digit-inner';
+        const strip=document.createElement('div');strip.className='digit-strip';
+        for(let i=0;i<=9;i++){const num=document.createElement('div');num.className='digit-number';num.textContent=i;strip.appendChild(num);}inner.appendChild(strip);digit.appendChild(inner);return{element:digit,strip};
+      }
+      function initializeDigits(count){
+        const countStr=String(count);digitsContainer.innerHTML='';digitElements=[];
+        for(let i=0;i<countStr.length;i++){
+          const val=parseInt(countStr[i],10)||0;
+          const d=createDigitElement();digitsContainer.appendChild(d.element);digitElements.push(d);
+          d.element.dataset.digit = val; // Store current digit for resize handling
+          // defer until cell height known
+          requestAnimationFrame(()=>{
+            const h=d.strip.querySelector('.digit-number').offsetHeight||1;
+            d.strip.style.transform=`translateY(-${val*h}px)`;
+          });
         }
-      } catch (err){
-        console.error(err);
-        elCount.textContent = "–";
+        currentCount=count;
       }
-    }
-
-    function animateTo(n){
-      const start = last ?? n;
-      const dur = 600;
-      const t0 = performance.now();
-      function step(t){
-        const k = Math.min(1, (t - t0) / dur);
-        const v = Math.round(start + (n - start) * k);
-        elCount.textContent = v.toLocaleString();
-        if (k < 1) requestAnimationFrame(step); else last = n;
+      function updateDigits(newCount){
+        if(!Number.isFinite(newCount)){ if(currentCount===null) initializeDigits(0); return; }
+        if(currentCount===null){ initializeDigits(newCount); return; }
+        const oldStr=String(currentCount);const newStr=String(newCount);
+        if(oldStr.length!==newStr.length){ initializeDigits(newCount); return; }
+        for(let i=0;i<newStr.length;i++){
+          const newDigit=parseInt(newStr[i],10)||0;
+          const oldDigit=parseInt(oldStr[i],10)||0;
+          const d=digitElements[i]; if(!d) continue;
+          if(newDigit!==oldDigit){
+            const h=d.strip.querySelector('.digit-number').offsetHeight||1;
+            d.strip.style.transform=`translateY(-${newDigit*h}px)`;
+            d.element.dataset.digit = newDigit; // Store current digit for resize handling
+            // subtle flash for changed digits
+            d.element.classList.add('flash');
+            setTimeout(()=>d.element.classList.remove('flash'),900);
+          }
+        }
+        currentCount=newCount;
       }
-      requestAnimationFrame(step);
-    }
-
-    fetchCount();
-    setInterval(fetchCount, 15000);
-  </script>
-</body>
+      async function fetchCount(){
+        try{
+          // Force fresh data with timestamp to bypass all caches
+          const timestamp = Date.now();
+          const resp=await fetch(API_ENDPOINT+`?max_age=0&t=${timestamp}`,{
+            cache:'no-store',
+            headers: {'Cache-Control': 'no-cache, no-store, must-revalidate'}
+          });
+          const data=await resp.json();
+          const count=Number(data.count);
+          updateDigits(count);
+          updateDebug(data);
+        }catch(e){console.error('fetch error',e);updateDigits(NaN);}
+      }
+      async function fetchRaw(){
+        try{
+          const resp=await fetch('http://127.0.0.1:5050/count/raw',{cache:'no-store'});
+          const data=await resp.json();
+          updateDebug({raw:data});
+        }catch(e){console.warn('raw fetch failed',e);}
+      }
+      function updateDebug(meta){
+        const box=document.getElementById('debugOverlay');
+        if(!box.classList.contains('active')) return;
+        const lines=[];
+        if(meta){
+          if('count' in meta){
+            lines.push(`count: ${meta.count}`);
+            lines.push(`cached_age: ${meta.cached_seconds}s / ttl:${meta.ttl}`);
+            lines.push(`threshold: ${meta.effective_threshold}`);
+          }
+          if(meta.raw){
+            lines.push(`fresh: ${meta.raw.fresh_count}`);
+            lines.push(`cached: ${meta.raw.cached_count}`);
+            lines.push(`diff: ${meta.raw.difference}`);
+            lines.push(`raw_age: ${meta.raw.cached_age}`);
+          }
+        }
+        lines.push(`local time: ${new Date().toLocaleTimeString()}`);
+        box.textContent=lines.join('\n');
+      }
+  // 40s countdown refresh
+  const REFRESH_SECONDS = 40;
+      const countdownNumEl = document.getElementById('countdownNum');
+      let secondsRemaining = REFRESH_SECONDS;
+      function renderCountdown(){ countdownNumEl.textContent = secondsRemaining; }
+      function triggerCycleAnimation(){
+        digitElements.forEach(d=>{
+          d.element.classList.add('flash');
+          setTimeout(()=>d.element.classList.remove('flash'),900);
+        });
+      }
+      function triggerRollAnimation(){
+        digitElements.forEach(d=>{
+          const strip = d.strip;
+          const currentDigit = parseInt(d.element.dataset.digit || '0', 10);
+          const h = strip.querySelector('.digit-number').offsetHeight || 1;
+          
+          // Roll through all digits (0-9) then back to current digit
+          const totalRoll = (10 + currentDigit) * h;
+          strip.style.transition = 'transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+          strip.style.transform = `translateY(-${totalRoll}px)`;
+          
+          // After animation, snap back to current digit without transition
+          setTimeout(() => {
+            strip.style.transition = 'none';
+            strip.style.transform = `translateY(-${currentDigit * h}px)`;
+            setTimeout(() => {
+              strip.style.transition = 'transform 0.6s cubic-bezier(0.34,1.56,0.64,1)';
+            }, 50);
+          }, 1200);
+        });
+      }
+      function tick(){
+        secondsRemaining -= 1;
+        if(secondsRemaining <= 0){
+          triggerRollAnimation();
+          setTimeout(() => fetchCount(), 1200); // Fetch after roll completes
+          secondsRemaining = REFRESH_SECONDS;
+        }
+        renderCountdown();
+      }
+      function startCountdown(){
+        fetchCount(); // seed digits immediately
+        renderCountdown();
+        setInterval(tick,1000);
+        // periodic raw diagnostic every 20s if debug open
+        setInterval(()=>{ if(document.getElementById('debugOverlay').classList.contains('active')) fetchRaw(); },20000);
+      }
+      startCountdown();
+      
+      // Handle window resize to recalculate digit positions
+      let resizeTimer;
+      function recalculateDigitPositions() {
+        digitElements.forEach(d => {
+          const currentDigit = parseInt(d.element.dataset.digit || '0');
+          const h = d.strip.querySelector('.digit-number').offsetHeight || 1;
+          d.strip.style.transform = `translateY(-${currentDigit * h}px)`;
+        });
+      }
+      
+      window.addEventListener('resize', () => {
+        // Debounce resize events
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          recalculateDigitPositions();
+        }, 100);
+      });
+      
+      // Toggle debug overlay with 'd'
+      window.addEventListener('keydown',e=>{
+        if(e.key==='d'){
+          const box=document.getElementById('debugOverlay');
+            box.classList.toggle('active');
+            updateDebug();
+        }
+      });
+    </script>
+  </body>
 </html>
